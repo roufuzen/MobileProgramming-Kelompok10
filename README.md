@@ -8,6 +8,7 @@ Berikut adalah daftar anggota pengembang projek ini:
 * **Fatih Ahmad Hosam Abiyasa**
 * **Abdurrouf Faiz Al Farisyi**
 * **Ahmad Agung Maulana**
+* **Farrel Irawan**
 
 ---
 
