@@ -1,4 +1,4 @@
-# Aplikasi Manajemen Perpustakaan Digital 📚
+# Aplikasi Perpustakaan 📚
 
 Project repository untuk pengembangan sistem informasi manajemen perpustakaan yang dirancang untuk mempermudah pendaftaran anggota, pengelolaan peminjaman, pengembalian buku, hingga kearsipan secara terstruktur.
 
