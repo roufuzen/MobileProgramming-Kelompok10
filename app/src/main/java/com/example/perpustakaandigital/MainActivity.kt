@@ -4,13 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.*
+import com.example.perpustakaandigital.ui.auth.LoginScreen
+import com.example.perpustakaandigital.ui.auth.RegisterScreen
+import com.example.perpustakaandigital.ui.home.MainMenuScreen
+import com.example.perpustakaandigital.ui.transaksi.PengembalianScreen
 import com.example.perpustakaandigital.ui.theme.PerpustakaanDigitalTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +17,36 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PerpustakaanDigitalTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                var currentScreen by remember { mutableStateOf("login") }
+
+                when (currentScreen) {
+                    "login" -> {
+                        LoginScreen(
+                            onLoginClick = { currentScreen = "home" },
+                            onRegisterClick = { currentScreen = "register" }
+                        )
+                    }
+                    "register" -> {
+                        RegisterScreen(
+                            onRegisterClick = { currentScreen = "home" },
+                            onLoginClick = { currentScreen = "login" }
+                        )
+                    }
+                    "home" -> {
+                        MainMenuScreen(
+                            onLogout = { currentScreen = "login" },
+                            onKelolaBuku = { /* Navigasi ke Kelola Buku */ },
+                            onPeminjaman = { /* Navigasi ke Peminjaman */ },
+                            onPengembalian = { currentScreen = "pengembalian" }
+                        )
+                    }
+                    "pengembalian" -> {
+                        PengembalianScreen(
+                            onBack = { currentScreen = "home" }
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PerpustakaanDigitalTheme {
-        Greeting("Android")
     }
 }
