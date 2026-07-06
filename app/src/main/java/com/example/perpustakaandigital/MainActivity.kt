@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
 import com.example.perpustakaandigital.ui.auth.LoginScreen
 import com.example.perpustakaandigital.ui.auth.RegisterScreen
+import com.example.perpustakaandigital.ui.buku.KelolaBukuScreen
 import com.example.perpustakaandigital.ui.home.MainMenuScreen
 import com.example.perpustakaandigital.ui.transaksi.PengembalianScreen
 import com.example.perpustakaandigital.ui.theme.PerpustakaanDigitalTheme
@@ -35,9 +36,14 @@ class MainActivity : ComponentActivity() {
                     "home" -> {
                         MainMenuScreen(
                             onLogout = { currentScreen = "login" },
-                            onKelolaBuku = { /* Navigasi ke Kelola Buku */ },
+                            onKelolaBuku = { currentScreen = "kelolabuku" },
                             onPeminjaman = { /* Navigasi ke Peminjaman */ },
                             onPengembalian = { currentScreen = "pengembalian" }
+                        )
+                    }
+                    "kelolabuku" -> {
+                        KelolaBukuScreen (
+                            onBack = { currentScreen = "home" }
                         )
                     }
                     "pengembalian" -> {
