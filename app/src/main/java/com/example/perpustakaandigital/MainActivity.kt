@@ -11,11 +11,9 @@ import com.example.perpustakaandigital.ui.buku.KelolaBukuScreen
 import com.example.perpustakaandigital.ui.home.MainMenuScreen
 import com.example.perpustakaandigital.ui.transaksi.PengembalianScreen
 import com.example.perpustakaandigital.ui.theme.PerpustakaanDigitalTheme
-<<<<<<< HEAD
 import com.example.perpustakaandigital.ui.pemustaka.FormPendaftaranScreen
 import com.example.perpustakaandigital.ui.pemustaka.DetailAnggotaScreen
-=======
->>>>>>> 491efb48f1640f4aac828275bfa160a9a73783d3
+import com.example.perpustakaandigital.ui.laporan.LaporanScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +23,6 @@ class MainActivity : ComponentActivity() {
             PerpustakaanDigitalTheme {
                 var currentScreen by remember { mutableStateOf("login") }
 
-<<<<<<< HEAD
                 // --- WADAH PENAMPUNG DATA ANGGOTA BARU ---
                 var savedName by remember { mutableStateOf("") }
                 var savedNik by remember { mutableStateOf("") }
@@ -33,8 +30,6 @@ class MainActivity : ComponentActivity() {
                 var savedAddress by remember { mutableStateOf("") }
                 var isUserRegistered by remember { mutableStateOf(false) }
 
-=======
->>>>>>> 491efb48f1640f4aac828275bfa160a9a73783d3
                 when (currentScreen) {
                     "login" -> {
                         LoginScreen(
@@ -52,24 +47,16 @@ class MainActivity : ComponentActivity() {
                         MainMenuScreen(
                             onLogout = { currentScreen = "login" },
                             onKelolaBuku = { currentScreen = "kelolabuku" },
-<<<<<<< HEAD
                             onPeminjaman = { /* Nanti diisi oleh teman Anda */ },
                             onPengembalian = { currentScreen = "pengembalian" },
                             onPendaftaranAnggota = { currentScreen = "form_pendaftaran" },
+                            onLaporan = { currentScreen = "laporan" },
                             // --- KIRIM STATUS DAFTAR KE MAIN MENU ---
                             isSudahDaftar = isUserRegistered
                         )
                     }
                     "kelolabuku" -> {
                         KelolaBukuScreen(
-=======
-                            onPeminjaman = { /* Navigasi ke Peminjaman */ },
-                            onPengembalian = { currentScreen = "pengembalian" }
-                        )
-                    }
-                    "kelolabuku" -> {
-                        KelolaBukuScreen (
->>>>>>> 491efb48f1640f4aac828275bfa160a9a73783d3
                             onBack = { currentScreen = "home" }
                         )
                     }
@@ -78,7 +65,11 @@ class MainActivity : ComponentActivity() {
                             onBack = { currentScreen = "home" }
                         )
                     }
-<<<<<<< HEAD
+                    "laporan" -> {
+                        LaporanScreen(
+                            onBack = { currentScreen = "home" }
+                        )
+                    }
 
                     // --- RUTE 1: HALAMAN FORMULIR PENDAFTARAN ANGGOTA ---
                     "form_pendaftaran" -> {
@@ -110,8 +101,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-=======
->>>>>>> 491efb48f1640f4aac828275bfa160a9a73783d3
                 }
             }
         }

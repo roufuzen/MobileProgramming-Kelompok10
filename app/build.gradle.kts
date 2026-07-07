@@ -48,10 +48,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-<<<<<<< HEAD
     implementation("com.google.zxing:core:3.5.3")
-=======
->>>>>>> 491efb48f1640f4aac828275bfa160a9a73783d3
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
