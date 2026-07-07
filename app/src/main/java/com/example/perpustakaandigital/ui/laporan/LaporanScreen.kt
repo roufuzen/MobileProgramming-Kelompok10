@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LaporanScreen(
+    riwayatPengembalian: List<LaporanItem> = emptyList(),
     onBack: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -57,7 +58,7 @@ fun LaporanScreen(
 
             when (selectedTab) {
                 0 -> LaporanPeminjaman()
-                1 -> LaporanPengembalian()
+                1 -> LaporanPengembalian(riwayatPengembalian)
                 2 -> LaporanStokBuku()
             }
         }
@@ -83,17 +84,12 @@ fun LaporanPeminjaman() {
 }
 
 @Composable
-fun LaporanPengembalian() {
-    val dummyData = listOf(
-        LaporanItem("Laskar Pelangi", "Budi Santoso", "19 Okt 2023", "Tepat Waktu"),
-        LaporanItem("Filosofi Teras", "Andi Wijaya", "20 Okt 2023", "Terlambat 2 Hari")
-    )
-
+fun LaporanPengembalian(riwayat: List<LaporanItem> = emptyList()) {
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         item {
-            SummaryCard("Total Pengembalian", "38 Buku", Icons.Default.Info)
+            SummaryCard("Total Pengembalian", "${riwayat.size} Buku", Icons.Default.Info)
         }
-        items(dummyData) { item ->
+        items(riwayat) { item ->
             LaporanCard(item)
         }
     }

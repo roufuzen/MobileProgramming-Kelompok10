@@ -10,10 +10,12 @@ import com.example.perpustakaandigital.ui.auth.RegisterScreen
 import com.example.perpustakaandigital.ui.buku.KelolaBukuScreen
 import com.example.perpustakaandigital.ui.home.MainMenuScreen
 import com.example.perpustakaandigital.ui.transaksi.PengembalianScreen
+import com.example.perpustakaandigital.ui.transaksi.PeminjamanScreen
 import com.example.perpustakaandigital.ui.theme.PerpustakaanDigitalTheme
 import com.example.perpustakaandigital.ui.pemustaka.FormPendaftaranScreen
 import com.example.perpustakaandigital.ui.pemustaka.DetailAnggotaScreen
 import com.example.perpustakaandigital.ui.laporan.LaporanScreen
+import com.example.perpustakaandigital.ui.laporan.LaporanItem
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +31,9 @@ class MainActivity : ComponentActivity() {
                 var savedPhone by remember { mutableStateOf("") }
                 var savedAddress by remember { mutableStateOf("") }
                 var isUserRegistered by remember { mutableStateOf(false) }
+
+                // --- WADAH PENAMPUNG RIWAYAT PENGEMBALIAN ---
+                val riwayatPengembalian = remember { mutableStateListOf<LaporanItem>() }
 
                 when (currentScreen) {
                     "login" -> {
@@ -47,11 +52,10 @@ class MainActivity : ComponentActivity() {
                         MainMenuScreen(
                             onLogout = { currentScreen = "login" },
                             onKelolaBuku = { currentScreen = "kelolabuku" },
-                            onPeminjaman = { /* Nanti diisi oleh teman Anda */ },
+                            onPeminjaman = { currentScreen = "peminjaman" },
                             onPengembalian = { currentScreen = "pengembalian" },
                             onPendaftaranAnggota = { currentScreen = "form_pendaftaran" },
                             onLaporan = { currentScreen = "laporan" },
-                            // --- KIRIM STATUS DAFTAR KE MAIN MENU ---
                             isSudahDaftar = isUserRegistered
                         )
                     }
@@ -60,13 +64,25 @@ class MainActivity : ComponentActivity() {
                             onBack = { currentScreen = "home" }
                         )
                     }
+                    "peminjaman" -> {
+                        PeminjamanScreen(
+                            onBack = { currentScreen = "home" }
+                        )
+                    }
                     "pengembalian" -> {
                         PengembalianScreen(
-                            onBack = { currentScreen = "home" }
+                            pendaftarName = if (isUserRegistered) savedName else "Tamu / Belum Daftar",
+                            pendaftarId = if (isUserRegistered) savedNik else "-",
+                            riwayatPengembalian = riwayatPengembalian, // Pass the list
+                            onBack = { currentScreen = "home" },
+                            onReturnSuccess = { item ->
+                                riwayatPengembalian.add(0, item) // Tambah di paling atas
+                            }
                         )
                     }
                     "laporan" -> {
                         LaporanScreen(
+                            riwayatPengembalian = riwayatPengembalian,
                             onBack = { currentScreen = "home" }
                         )
                     }
@@ -75,13 +91,10 @@ class MainActivity : ComponentActivity() {
                     "form_pendaftaran" -> {
                         FormPendaftaranScreen(
                             onNextClick = { name, nik, phone, address ->
-                                // Simpan kiriman data input ke wadah penampung
                                 savedName = name
                                 savedNik = nik
                                 savedPhone = phone
                                 savedAddress = address
-
-                                // Pindah ke layar cetak kartu & QR Code
                                 currentScreen = "detail_anggota"
                             }
                         )
@@ -95,7 +108,6 @@ class MainActivity : ComponentActivity() {
                             phone = savedPhone,
                             address = savedAddress,
                             onFinishClick = {
-                                // --- KUNCI DIUBAH MENJADI TERBUKA DI SINI ---
                                 isUserRegistered = true
                                 currentScreen = "home"
                             }
