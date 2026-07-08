@@ -17,16 +17,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.perpustakaandigital.ui.laporan.LaporanItem
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeminjamanScreen(
+    onBorrowSuccess: (LaporanItem) -> Unit,
     onBack: () -> Unit
 ) {
     var bookCode by remember { mutableStateOf("") }
     var borrowerName by remember { mutableStateOf("") }
+    
+    // Sinkronisasi data dummy dengan KelolaBukuScreen
+    val registeredBooks = mapOf(
+        "BK001" to "Laskar Pelangi",
+        "BK002" to "Bumi Manusia",
+        "BK003" to "Filosofi Teras"
+    )
+    
+    val bookTitle = remember(bookCode) {
+        registeredBooks[bookCode.trim().uppercase()] ?: ""
+    }
     
     val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.forLanguageTag("id-ID"))
     val calendar = Calendar.getInstance()
@@ -76,11 +89,29 @@ fun PeminjamanScreen(
             OutlinedTextField(
                 value = bookCode,
                 onValueChange = { bookCode = it },
-                label = { Text("Kode Buku") },
+                label = { Text("Kode Buku (Contoh: BK001)") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                isError = bookCode.isNotEmpty() && bookTitle.isEmpty()
             )
+            
+            if (bookCode.isNotEmpty() && bookTitle.isEmpty()) {
+                Text(
+                    text = "Kode buku tidak terdaftar",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.align(Alignment.Start).padding(start = 8.dp)
+                )
+            } else if (bookTitle.isNotEmpty()) {
+                Text(
+                    text = "Judul Buku: $bookTitle",
+                    color = Color(0xFF2E7D32),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.Start).padding(start = 8.dp, top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -152,7 +183,18 @@ fun PeminjamanScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { /* Save Peminjaman */ },
+                onClick = { 
+                    onBorrowSuccess(
+                        LaporanItem(
+                            title = bookTitle,
+                            subtitle = borrowerName,
+                            date = borrowDate,
+                            status = "Dipinjam"
+                        )
+                    )
+                    onBack()
+                },
+                enabled = bookTitle.isNotEmpty() && borrowerName.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),

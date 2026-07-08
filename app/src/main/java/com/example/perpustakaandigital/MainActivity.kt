@@ -32,7 +32,8 @@ class MainActivity : ComponentActivity() {
                 var savedAddress by remember { mutableStateOf("") }
                 var isUserRegistered by remember { mutableStateOf(false) }
 
-                // --- WADAH PENAMPUNG RIWAYAT PENGEMBALIAN ---
+                // --- WADAH PENAMPUNG RIWAYAT ---
+                val riwayatPeminjaman = remember { mutableStateListOf<LaporanItem>() }
                 val riwayatPengembalian = remember { mutableStateListOf<LaporanItem>() }
 
                 when (currentScreen) {
@@ -66,6 +67,9 @@ class MainActivity : ComponentActivity() {
                     }
                     "peminjaman" -> {
                         PeminjamanScreen(
+                            onBorrowSuccess = { item ->
+                                riwayatPeminjaman.add(0, item)
+                            },
                             onBack = { currentScreen = "home" }
                         )
                     }
@@ -73,7 +77,7 @@ class MainActivity : ComponentActivity() {
                         PengembalianScreen(
                             pendaftarName = if (isUserRegistered) savedName else "Tamu / Belum Daftar",
                             pendaftarId = if (isUserRegistered) savedNik else "-",
-                            riwayatPengembalian = riwayatPengembalian, // Pass the list
+                            riwayatPengembalian = riwayatPengembalian,
                             onBack = { currentScreen = "home" },
                             onReturnSuccess = { item ->
                                 riwayatPengembalian.add(0, item) // Tambah di paling atas
@@ -82,6 +86,7 @@ class MainActivity : ComponentActivity() {
                     }
                     "laporan" -> {
                         LaporanScreen(
+                            riwayatPeminjaman = riwayatPeminjaman,
                             riwayatPengembalian = riwayatPengembalian,
                             onBack = { currentScreen = "home" }
                         )

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LaporanScreen(
+    riwayatPeminjaman: List<LaporanItem> = emptyList(),
     riwayatPengembalian: List<LaporanItem> = emptyList(),
     onBack: () -> Unit
 ) {
@@ -57,7 +58,7 @@ fun LaporanScreen(
             }
 
             when (selectedTab) {
-                0 -> LaporanPeminjaman()
+                0 -> LaporanPeminjaman(riwayatPeminjaman)
                 1 -> LaporanPengembalian(riwayatPengembalian)
                 2 -> LaporanStokBuku()
             }
@@ -66,18 +67,29 @@ fun LaporanScreen(
 }
 
 @Composable
-fun LaporanPeminjaman() {
-    val dummyData = listOf(
-        LaporanItem("Laskar Pelangi", "Budi Santoso", "12 Okt 2023"),
-        LaporanItem("Bumi", "Siti Aminah", "15 Okt 2023"),
-        LaporanItem("Negeri 5 Menara", "Ahmad Fauzi", "18 Okt 2023")
-    )
+fun LaporanPeminjaman(riwayat: List<LaporanItem> = emptyList()) {
+    // Jika riwayat kosong, bisa tampilkan data dummy atau pesan kosong
+    // Di sini saya pilih untuk mengutamakan data riwayat yang masuk
+    
+    val displayData = if (riwayat.isEmpty()) {
+        listOf(
+            LaporanItem("Laskar Pelangi", "Budi Santoso", "12 Okt 2023"),
+            LaporanItem("Bumi", "Siti Aminah", "15 Okt 2023"),
+            LaporanItem("Negeri 5 Menara", "Ahmad Fauzi", "18 Okt 2023")
+        )
+    } else {
+        riwayat
+    }
 
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         item {
-            SummaryCard("Total Peminjaman Bulan Ini", "45 Buku", Icons.Default.DateRange)
+            SummaryCard(
+                title = if (riwayat.isEmpty()) "Total Peminjaman (Dummy)" else "Total Peminjaman Bulan Ini",
+                value = "${displayData.size} Buku",
+                icon = Icons.Default.DateRange
+            )
         }
-        items(dummyData) { item ->
+        items(displayData) { item ->
             LaporanCard(item)
         }
     }
