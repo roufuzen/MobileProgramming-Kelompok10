@@ -29,30 +29,27 @@ fun PeminjamanScreen(
 ) {
     var bookCode by remember { mutableStateOf("") }
     var borrowerName by remember { mutableStateOf("") }
-    
+
     // Sinkronisasi data dummy dengan KelolaBukuScreen
     val registeredBooks = mapOf(
         "BK001" to "Laskar Pelangi",
         "BK002" to "Bumi Manusia",
         "BK003" to "Filosofi Teras"
     )
-    
+
     val bookTitle = remember(bookCode) {
         registeredBooks[bookCode.trim().uppercase()] ?: ""
     }
-    
+
     val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.forLanguageTag("id-ID"))
     val calendar = Calendar.getInstance()
-    
+
     val borrowDate = remember { sdf.format(calendar.time) }
-    
-    // Perkiraan kembali 7 hari kemudian
+
+    // Perkiraan kembali 14 hari (2 minggu) kemudian
     val calReturn = Calendar.getInstance()
-    calReturn.add(Calendar.DAY_OF_YEAR, 7)
+    calReturn.add(Calendar.DAY_OF_YEAR, 14)
     val estimatedReturnDate = remember { sdf.format(calReturn.time) }
-    
-    // Tanggal Kembali (biasanya kosong saat pinjam baru)
-    var returnDate by remember { mutableStateOf("-") }
 
     Scaffold(
         topBar = {
@@ -82,7 +79,7 @@ fun PeminjamanScreen(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.Start)
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
 
             // Kode Buku
@@ -95,7 +92,7 @@ fun PeminjamanScreen(
                 shape = RoundedCornerShape(12.dp),
                 isError = bookCode.isNotEmpty() && bookTitle.isEmpty()
             )
-            
+
             if (bookCode.isNotEmpty() && bookTitle.isEmpty()) {
                 Text(
                     text = "Kode buku tidak terdaftar",
@@ -151,7 +148,7 @@ fun PeminjamanScreen(
             OutlinedTextField(
                 value = estimatedReturnDate,
                 onValueChange = { },
-                label = { Text("Perkiraan Kembali (7 Hari)") },
+                label = { Text("Perkiraan Kembali (2 Minggu)") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
                 shape = RoundedCornerShape(12.dp),
@@ -164,26 +161,11 @@ fun PeminjamanScreen(
                     disabledLeadingIconColor = MaterialTheme.colorScheme.primary
                 )
             )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Tanggal Kembali (Aktual)
-            OutlinedTextField(
-                value = returnDate,
-                onValueChange = { },
-                label = { Text("Tanggal Kembali (Aktual)") },
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
-                shape = RoundedCornerShape(12.dp),
-                readOnly = true,
-                enabled = false,
-                placeholder = { Text("Belum dikembalikan") }
-            )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { 
+                onClick = {
                     onBorrowSuccess(
                         LaporanItem(
                             title = bookTitle,
