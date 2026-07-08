@@ -13,12 +13,14 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.perpustakaandigital.ui.buku.Buku
 import com.example.perpustakaandigital.ui.laporan.LaporanItem
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -26,7 +28,6 @@ import java.util.*
 
 /**
  * Data buku hasil pencarian kode buku pada form Peminjaman.
- * NOTE: data disimulasikan (belum terhubung ke modul Kelola Buku/database asli).
  */
 data class BookLoanInfo(
     val kode: String,
@@ -37,6 +38,7 @@ data class BookLoanInfo(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeminjamanScreen(
+    bukuList: SnapshotStateList<Buku>,
     onBorrowSuccess: (LaporanItem) -> Unit,
     onBack: () -> Unit
 ) {
@@ -68,6 +70,15 @@ fun PeminjamanScreen(
             borrowDate = borrowDate,
             estimatedReturnDate = estimatedReturnDate,
             onDismiss = {
+                // Kurangi stok buku di list global
+                val index = bukuList.indexOfFirst { it.kode == bookInfo!!.kode }
+                if (index != -1) {
+                    val currentBuku = bukuList[index]
+                    if (currentBuku.stok > 0) {
+                        bukuList[index] = currentBuku.copy(stok = currentBuku.stok - 1)
+                    }
+                }
+
                 val newItem = LaporanItem(
                     title = bookInfo!!.title,
                     subtitle = borrowerName,
@@ -142,14 +153,15 @@ fun PeminjamanScreen(
             Button(
                 onClick = {
                     searchAttempted = true
-                    // Simulasi pencarian data buku berdasarkan kode
-                    bookInfo = if (bookCode.isNotBlank()) {
+                    // Mencari data buku berdasarkan kode dari bukuList global
+                    val foundBuku = bukuList.find { it.kode.equals(bookCode.trim(), ignoreCase = true) }
+                    bookInfo = foundBuku?.let {
                         BookLoanInfo(
-                            kode = bookCode,
-                            title = "Laskar Pelangi",
-                            stock = 3
+                            kode = it.kode,
+                            title = it.judul,
+                            stock = it.stok
                         )
-                    } else null
+                    }
                 },
                 modifier = Modifier.fillMaxWidth().height(46.dp),
                 shape = RoundedCornerShape(12.dp)

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.perpustakaandigital.ui.buku.Buku
 import com.example.perpustakaandigital.ui.laporan.LaporanCardImproved
 import com.example.perpustakaandigital.ui.laporan.LaporanItem
 import java.text.SimpleDateFormat
@@ -36,6 +38,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PengembalianScreen(
+    bukuList: SnapshotStateList<Buku>,
     pendaftarName: String = "Budi Santoso",
     pendaftarId: String = "M-2023001",
     riwayatPengembalian: List<LaporanItem> = emptyList(),
@@ -53,13 +56,6 @@ fun PengembalianScreen(
     var selectedCondition by remember { mutableStateOf("Baik") }
     val conditions = listOf("Baik", "Rusak Ringan", "Rusak Berat", "Hilang")
     var expanded by remember { mutableStateOf(false) }
-
-    // Sinkronisasi data dummy dengan KelolaBukuScreen
-    val registeredBooks = mapOf(
-        "BK001" to "Laskar Pelangi",
-        "BK002" to "Bumi Manusia",
-        "BK003" to "Filosofi Teras"
-    )
 
     val sdf = SimpleDateFormat("dd MMMM yyyy", Locale.forLanguageTag("id-ID"))
     val todayDate = Date()
@@ -91,6 +87,14 @@ fun PengembalianScreen(
                 } else ""
 
                 val statusText = if (bookInfo!!.isLate) "Terlambat$lateDurationText - $selectedCondition" else "Tepat Waktu - $selectedCondition"
+                
+                // Tambahkan stok buku kembali saat dikembalikan
+                val index = bukuList.indexOfFirst { it.kode.equals(bookInfo!!.code, ignoreCase = true) }
+                if (index != -1) {
+                    val currentBuku = bukuList[index]
+                    bukuList[index] = currentBuku.copy(stok = currentBuku.stok + 1)
+                }
+
                 onReturnSuccess(
                     LaporanItem(
                         title = bookInfo!!.title,
@@ -171,9 +175,9 @@ fun PengembalianScreen(
                     isSearchPerformed = false
                     bookInfo = null
                 },
-                label = { Text("Kode Buku (Contoh: BK001)") },
+                label = { Text("Kode Buku") },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("BK001, BK002, atau BK003") },
+                placeholder = { Text("Contoh: BK001") },
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
@@ -185,16 +189,17 @@ fun PengembalianScreen(
                 onClick = {
                     isSearchPerformed = true
                     val code = bookCode.trim().uppercase()
-                    val judulBuku = registeredBooks[code]
+                    val foundBuku = bukuList.find { it.kode.equals(code, ignoreCase = true) }
 
-                    bookInfo = if (judulBuku != null) {
+                    bookInfo = if (foundBuku != null) {
                         BookReturnInfo(
-                            title = judulBuku,
+                            code = foundBuku.kode,
+                            title = foundBuku.judul,
                             borrower = pendaftarName,
                             memberId = pendaftarId,
                             memberStatus = if (pendaftarId != "-") "Aktif" else "Tidak Aktif",
-                            borrowDate = "10 Januari 2022",
-                            dueDate = "17 Januari 2022",
+                            borrowDate = "10 Januari 2024",
+                            dueDate = "17 Januari 2024",
                             isLate = true
                         )
                     } else {
@@ -348,7 +353,7 @@ fun PengembalianScreen(
                 }
             } else if (isSearchPerformed && bookCode.isNotBlank()) {
                 Text(
-                    "Kode buku tidak terdaftar dalam sistem kelola buku.",
+                    "Kode buku tidak terdaftar dalam sistem.",
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
@@ -593,6 +598,7 @@ fun StatusBadge(isLate: Boolean) {
 }
 
 data class BookReturnInfo(
+    val code: String,
     val title: String,
     val borrower: String,
     val memberId: String,

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,17 +31,9 @@ data class Buku(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KelolaBukuScreen(
+    bukuList: SnapshotStateList<Buku>,
     onBack: () -> Unit
 ) {
-    // Data dummy awal, nanti bisa diganti sumber data dari backend/database
-    val bukuList = remember {
-        mutableStateListOf(
-            Buku("BK001", "Laskar Pelangi", "Andrea Hirata", "Fiksi", 5),
-            Buku("BK002", "Bumi Manusia", "Pramoedya Ananta Toer", "Sejarah", 3),
-            Buku("BK003", "Filosofi Teras", "Henry Manampiring", "Non-Fiksi", 8)
-        )
-    }
-
     var searchQuery by remember { mutableStateOf("") }
     var showFormDialog by remember { mutableStateOf(false) }
     var bukuToEdit by remember { mutableStateOf<Buku?>(null) }

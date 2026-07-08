@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import com.example.perpustakaandigital.ui.auth.LoginScreen
 import com.example.perpustakaandigital.ui.auth.RegisterScreen
 import com.example.perpustakaandigital.ui.buku.KelolaBukuScreen
+import com.example.perpustakaandigital.ui.buku.Buku
 import com.example.perpustakaandigital.ui.home.MainMenuScreen
 import com.example.perpustakaandigital.ui.transaksi.PengembalianScreen
 import com.example.perpustakaandigital.ui.transaksi.PeminjamanScreen
@@ -32,6 +33,15 @@ class MainActivity : ComponentActivity() {
                 var savedPhone by remember { mutableStateOf("") }
                 var savedAddress by remember { mutableStateOf("") }
                 var isUserRegistered by remember { mutableStateOf(false) }
+
+                // --- WADAH PENAMPUNG DATA BUKU ---
+                val daftarBuku = remember {
+                    mutableStateListOf(
+                        Buku("BK001", "Laskar Pelangi", "Andrea Hirata", "Fiksi", 5),
+                        Buku("BK002", "Bumi Manusia", "Pramoedya Ananta Toer", "Sejarah", 3),
+                        Buku("BK003", "Filosofi Teras", "Henry Manampiring", "Non-Fiksi", 8)
+                    )
+                }
 
                 // --- WADAH PENAMPUNG RIWAYAT ---
                 val riwayatPeminjaman = remember { mutableStateListOf<LaporanItem>() }
@@ -72,11 +82,13 @@ class MainActivity : ComponentActivity() {
                     }
                     "kelolabuku" -> {
                         KelolaBukuScreen(
+                            bukuList = daftarBuku,
                             onBack = { currentScreen = "home" }
                         )
                     }
                     "peminjaman" -> {
                         PeminjamanScreen(
+                            bukuList = daftarBuku,
                             onBorrowSuccess = { item ->
                                 riwayatPeminjaman.add(0, item)
                             },
@@ -85,13 +97,14 @@ class MainActivity : ComponentActivity() {
                     }
                     "pengembalian" -> {
                         PengembalianScreen(
+                            bukuList = daftarBuku,
                             pendaftarName = if (isAdmin) "Administrator" else if (isUserRegistered) savedName else "Tamu / Belum Daftar",
                             pendaftarId = if (isAdmin) "ADM-001" else if (isUserRegistered) savedNik else "-",
                             riwayatPengembalian = riwayatPengembalian,
                             isAdmin = isAdmin,
                             onBack = { currentScreen = "home" },
                             onReturnSuccess = { item ->
-                                riwayatPengembalian.add(0, item) // Tambah di paling atas
+                                riwayatPengembalian.add(0, item) 
                             }
                         )
                     }
@@ -99,12 +112,12 @@ class MainActivity : ComponentActivity() {
                         LaporanScreen(
                             riwayatPeminjaman = riwayatPeminjaman,
                             riwayatPengembalian = riwayatPengembalian,
+                            bukuList = daftarBuku,
                             isAdmin = isAdmin,
                             onBack = { currentScreen = "home" }
                         )
                     }
 
-                    // --- RUTE 1: HALAMAN FORMULIR PENDAFTARAN ANGGOTA ---
                     "form_pendaftaran" -> {
                         FormPendaftaranScreen(
                             onNextClick = { name, nik, phone, address ->
@@ -117,7 +130,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // --- RUTE 2: HALAMAN KARTU DIGITAL + GENERATE QR CODE ---
                     "detail_anggota" -> {
                         DetailAnggotaScreen(
                             name = savedName,

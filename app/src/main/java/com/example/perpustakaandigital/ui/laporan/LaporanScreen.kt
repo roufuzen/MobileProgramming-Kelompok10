@@ -20,12 +20,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.perpustakaandigital.ui.buku.Buku
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LaporanScreen(
     riwayatPeminjaman: List<LaporanItem> = emptyList(),
     riwayatPengembalian: List<LaporanItem> = emptyList(),
+    bukuList: List<Buku> = emptyList(),
     isAdmin: Boolean = false,
     onBack: () -> Unit
 ) {
@@ -51,7 +53,7 @@ fun LaporanScreen(
                 .padding(padding)
                 .background(Color(0xFFF8F9FA))
         ) {
-            // Header Section dengan Gradient agar senada dengan Main Menu
+            // Header Section
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -109,7 +111,7 @@ fun LaporanScreen(
                 when (selectedTab) {
                     0 -> LaporanPeminjaman(riwayatPeminjaman)
                     1 -> LaporanPengembalian(riwayatPengembalian)
-                    2 -> LaporanStokBuku()
+                    2 -> LaporanStokBuku(bukuList)
                 }
             }
         }
@@ -206,13 +208,19 @@ fun LaporanPengembalian(riwayat: List<LaporanItem> = emptyList()) {
 }
 
 @Composable
-fun LaporanStokBuku() {
-    val dummyData = listOf(
-        LaporanItem("Laskar Pelangi", "Kategori: Novel", "5", status = "Tersedia"),
-        LaporanItem("Bumi", "Kategori: Novel", "2", status = "Menipis"),
-        LaporanItem("Negeri 5 Menara", "Kategori: Novel", "0", status = "Habis"),
-        LaporanItem("Pemrograman Dasar", "Kategori: Edukasi", "8", status = "Tersedia")
-    )
+fun LaporanStokBuku(bukuList: List<Buku> = emptyList()) {
+    val displayData = bukuList.map {
+        LaporanItem(
+            title = it.judul,
+            subtitle = "Kategori: ${it.kategori}",
+            date = "${it.stok}",
+            status = when {
+                it.stok > 5 -> "Tersedia"
+                it.stok > 0 -> "Menipis"
+                else -> "Habis"
+            }
+        )
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -224,15 +232,15 @@ fun LaporanStokBuku() {
                 DetailedSummaryCard(
                     modifier = Modifier.weight(1f),
                     title = "Total Judul",
-                    value = "120",
+                    value = "${bukuList.size}",
                     icon = Icons.Default.Menu,
                     color = Color(0xFFE0F2F1),
                     contentColor = Color(0xFF00796B)
                 )
                 DetailedSummaryCard(
                     modifier = Modifier.weight(1f),
-                    title = "Koleksi",
-                    value = "Terupdate",
+                    title = "Total Stok",
+                    value = "${bukuList.sumOf { it.stok }}",
                     icon = Icons.Default.Refresh,
                     color = Color(0xFFE8EAF6),
                     contentColor = Color(0xFF303F9F)
@@ -242,7 +250,7 @@ fun LaporanStokBuku() {
         item {
             Text("Status Stok Per Judul", fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.padding(vertical = 4.dp))
         }
-        items(dummyData) { item ->
+        items(displayData) { item ->
             StockCardDetailed(item)
         }
     }
@@ -305,15 +313,7 @@ fun LaporanCardImproved(item: LaporanItem, type: String) {
             }
             
             Column(horizontalAlignment = Alignment.End) {
-                Text(item.date, fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
-                if (item.status != null) {
-                    Text(
-                        text = item.status,
-                        fontSize = 11.sp,
-                        color = if (item.status.contains("Terlambat")) Color.Red else Color(0xFF2E7D32),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(item.date, fontSize = 12.sp, color = Color.Gray)
             }
         }
     }
@@ -327,60 +327,36 @@ fun StockCardDetailed(item: LaporanItem) {
         elevation = CardDefaults.cardElevation(2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(item.title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Text(item.subtitle, fontSize = 13.sp, color = Color.Gray)
-                }
-                
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(item.title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(item.subtitle, fontSize = 13.sp, color = Color.Gray)
+            }
+            
+            Column(horizontalAlignment = Alignment.End) {
                 Surface(
                     color = when(item.status) {
                         "Tersedia" -> Color(0xFFE8F5E9)
                         "Menipis" -> Color(0xFFFFF3E0)
                         else -> Color(0xFFFFEBEE)
                     },
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = item.status ?: "",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        fontSize = 11.sp,
+                        text = "Stok: ${item.date}",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = when(item.status) {
-                            "Tersedia" -> Color(0xFF2E7D32)
-                            "Menipis" -> Color(0xFFEF6C00)
+                            "Tersedia" -> Color(0xFF388E3C)
+                            "Menipis" -> Color(0xFFE65100)
                             else -> Color(0xFFC62828)
                         }
                     )
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val stockValue = item.date.filter { it.isDigit() }.toFloatOrNull() ?: 0f
-                val progressValue = (stockValue / 10f).coerceIn(0f, 1f)
-                
-                LinearProgressIndicator(
-                    progress = { progressValue },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(6.dp)
-                        .clip(CircleShape),
-                    color = when(item.status) {
-                        "Tersedia" -> Color(0xFF4CAF50)
-                        "Menipis" -> Color(0xFFFF9800)
-                        else -> Color(0xFFF44336)
-                    },
-                    trackColor = Color(0xFFEEEEEE)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text("Sisa: ${item.date}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -391,8 +367,9 @@ fun EmptyState(message: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(vertical = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Icon(
             Icons.Default.Info,
@@ -401,7 +378,7 @@ fun EmptyState(message: String) {
             tint = Color.LightGray
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(message, color = Color.Gray, fontSize = 14.sp)
+        Text(message, color = Color.Gray, fontSize = 16.sp)
     }
 }
 
@@ -409,5 +386,5 @@ data class LaporanItem(
     val title: String,
     val subtitle: String,
     val date: String,
-    val status: String? = null
+    val status: String = ""
 )
