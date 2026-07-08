@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.perpustakaandigital.ui.laporan.LaporanCard
+import com.example.perpustakaandigital.ui.laporan.LaporanCardImproved
 import com.example.perpustakaandigital.ui.laporan.LaporanItem
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -39,6 +39,7 @@ fun PengembalianScreen(
     pendaftarName: String = "Budi Santoso",
     pendaftarId: String = "M-2023001",
     riwayatPengembalian: List<LaporanItem> = emptyList(),
+    isAdmin: Boolean = false,
     onReturnSuccess: (LaporanItem) -> Unit,
     onBack: () -> Unit
 ) {
@@ -136,6 +137,23 @@ fun PengembalianScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (isAdmin) {
+                Surface(
+                    color = Color(0xFFFFF9C4),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        text = "MODE ADMIN: Anda dapat mengubah kondisi buku untuk ujicoba.",
+                        modifier = Modifier.padding(12.dp),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFF57F17),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             Text(
                 text = "Masukkan Kode Buku",
                 fontSize = 18.sp,
@@ -193,7 +211,7 @@ fun PengembalianScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // TOMBOL RIWAYAT (DITAMBAHKAN DI SINI)
+            // TOMBOL RIWAYAT
             OutlinedButton(
                 onClick = { showHistory = true },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -281,31 +299,34 @@ fun PengembalianScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded },
+                            expanded = expanded && isAdmin,
+                            onExpandedChange = { if (isAdmin) expanded = !expanded },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             OutlinedTextField(
                                 value = selectedCondition,
                                 onValueChange = {},
                                 readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                trailingIcon = { if (isAdmin) ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                                 modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(12.dp),
+                                supportingText = { if (!isAdmin) Text("Hanya admin yang dapat mengubah kondisi") }
                             )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                conditions.forEach { condition ->
-                                    DropdownMenuItem(
-                                        text = { Text(condition) },
-                                        onClick = {
-                                            selectedCondition = condition
-                                            expanded = false
-                                        }
-                                    )
+                            if (isAdmin) {
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    conditions.forEach { condition ->
+                                        DropdownMenuItem(
+                                            text = { Text(condition) },
+                                            onClick = {
+                                                selectedCondition = condition
+                                                expanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -364,7 +385,7 @@ fun HistoryDialog(
                 Box(modifier = Modifier.heightIn(max = 400.dp)) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(riwayat) { item ->
-                            LaporanCard(item)
+                            LaporanCardImproved(item, type = "pengembalian")
                         }
                     }
                 }

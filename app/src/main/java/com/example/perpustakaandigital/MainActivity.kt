@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             PerpustakaanDigitalTheme {
                 var currentScreen by remember { mutableStateOf("login") }
+                var isAdmin by remember { mutableStateOf(false) }
 
                 // --- WADAH PENAMPUNG DATA ANGGOTA BARU ---
                 var savedName by remember { mutableStateOf("") }
@@ -39,13 +40,19 @@ class MainActivity : ComponentActivity() {
                 when (currentScreen) {
                     "login" -> {
                         LoginScreen(
-                            onLoginClick = { currentScreen = "home" },
+                            onLoginClick = { isLoginAdmin ->
+                                isAdmin = isLoginAdmin
+                                currentScreen = "home"
+                            },
                             onRegisterClick = { currentScreen = "register" }
                         )
                     }
                     "register" -> {
                         RegisterScreen(
-                            onRegisterClick = { currentScreen = "home" },
+                            onRegisterClick = {
+                                isAdmin = false
+                                currentScreen = "home"
+                            },
                             onLoginClick = { currentScreen = "login" }
                         )
                     }
@@ -57,7 +64,10 @@ class MainActivity : ComponentActivity() {
                             onPengembalian = { currentScreen = "pengembalian" },
                             onPendaftaranAnggota = { currentScreen = "form_pendaftaran" },
                             onLaporan = { currentScreen = "laporan" },
-                            isSudahDaftar = isUserRegistered
+                            isSudahDaftar = isUserRegistered || isAdmin,
+                            isAdmin = isAdmin,
+                            totalPeminjaman = riwayatPeminjaman.size,
+                            totalPengembalian = riwayatPengembalian.size
                         )
                     }
                     "kelolabuku" -> {
@@ -75,9 +85,10 @@ class MainActivity : ComponentActivity() {
                     }
                     "pengembalian" -> {
                         PengembalianScreen(
-                            pendaftarName = if (isUserRegistered) savedName else "Tamu / Belum Daftar",
-                            pendaftarId = if (isUserRegistered) savedNik else "-",
+                            pendaftarName = if (isAdmin) "Administrator" else if (isUserRegistered) savedName else "Tamu / Belum Daftar",
+                            pendaftarId = if (isAdmin) "ADM-001" else if (isUserRegistered) savedNik else "-",
                             riwayatPengembalian = riwayatPengembalian,
+                            isAdmin = isAdmin,
                             onBack = { currentScreen = "home" },
                             onReturnSuccess = { item ->
                                 riwayatPengembalian.add(0, item) // Tambah di paling atas
@@ -88,6 +99,7 @@ class MainActivity : ComponentActivity() {
                         LaporanScreen(
                             riwayatPeminjaman = riwayatPeminjaman,
                             riwayatPengembalian = riwayatPengembalian,
+                            isAdmin = isAdmin,
                             onBack = { currentScreen = "home" }
                         )
                     }

@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.perpustakaandigital.ui.laporan.LaporanItem
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,6 +37,7 @@ data class BookLoanInfo(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PeminjamanScreen(
+    onBorrowSuccess: (LaporanItem) -> Unit,
     onBack: () -> Unit
 ) {
     var bookCode by remember { mutableStateOf("") }
@@ -66,6 +68,14 @@ fun PeminjamanScreen(
             borrowDate = borrowDate,
             estimatedReturnDate = estimatedReturnDate,
             onDismiss = {
+                val newItem = LaporanItem(
+                    title = bookInfo!!.title,
+                    subtitle = borrowerName,
+                    date = borrowDate,
+                    status = "Dipinjam"
+                )
+                onBorrowSuccess(newItem)
+
                 showConfirmation = false
                 // Reset form setelah peminjaman berhasil disimpan
                 bookCode = ""
