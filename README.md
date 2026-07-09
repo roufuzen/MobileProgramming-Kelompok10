@@ -10,6 +10,9 @@ Berikut adalah daftar anggota pengembang projek ini:
 * **Ahmad Agung Maulana**
 * **Farrel Irawan**
 
+## 📺 Video Penjelasan Project
+Tonton video penjelasan project kami di sini:
+[![Video Penjelasan Project](https://img.youtube.com/vi/50Qb8_K8N0g/0.jpg)](https://www.youtube.com/watch?v=50Qb8_K8N0g)  
 ---
 
 ## 🚀 Fitur Utama Sistem
