@@ -12,7 +12,7 @@ Berikut adalah daftar anggota pengembang projek ini:
 
 ## 📺 Video Penjelasan Project
 Tonton video penjelasan project kami di sini:
-https://www.youtube.com/watch?v=50Qb8_K8N0g  
+[https://www.youtube.com/watch?v=50Qb8_K8N0g](https://youtu.be/oFRMJkQwWCI)  
 ---
 
 ## 📸 Screenshot Aplikasi
