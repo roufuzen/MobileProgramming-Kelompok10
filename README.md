@@ -18,9 +18,9 @@ https://www.youtube.com/watch?v=50Qb8_K8N0g
 ## 📸 Screenshot Aplikasi
  Berikut adalah beberapa tampilan utama dari aplikasi Perpustakaan Digital:
 ​
- | Login | Register | Dashboard |
+ | Login | Register | Dashboard | Kelola Buku | 
  |:---:|:---:|:---:|
- | ![Login Screen](img/login2.png) | ![Register Screen](img/register.png) | ![Dashboard](img/dashboard1.png) |
+ | ![Login Screen](img/login2.png) | ![Register Screen](img/register.png) | ![Dashboard](img/dashboard1.png) | ![Kelola Buku](img/dashboard1.png) |
 ​
  | Peminjaman | Pengembalian | Laporan |
  |:---:|:---:|:---:|
