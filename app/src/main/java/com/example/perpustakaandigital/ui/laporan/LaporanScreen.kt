@@ -386,5 +386,7 @@ data class LaporanItem(
     val title: String,
     val subtitle: String,
     val date: String,
-    val status: String = ""
+    val status: String = "",
+    val bookCode: String = "",
+    val dueDate: String = ""
 )

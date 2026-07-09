@@ -41,6 +41,7 @@ fun PengembalianScreen(
     bukuList: SnapshotStateList<Buku>,
     pendaftarName: String = "Budi Santoso",
     pendaftarId: String = "M-2023001",
+    riwayatPeminjaman: List<LaporanItem> = emptyList(),
     riwayatPengembalian: List<LaporanItem> = emptyList(),
     isAdmin: Boolean = false,
     onReturnSuccess: (LaporanItem) -> Unit,
@@ -50,9 +51,10 @@ fun PengembalianScreen(
     var bookInfo by remember { mutableStateOf<BookReturnInfo?>(null) }
     var showReport by remember { mutableStateOf(false) }
     var showHistory by remember { mutableStateOf(false) }
+    var showNoDataPopup by remember { mutableStateOf(false) }
     var isSearchPerformed by remember { mutableStateOf(false) }
 
-    // State untuk kondisi buku
+    // State untuk kondisi buku (Default: Baik)
     var selectedCondition by remember { mutableStateOf("Baik") }
     val conditions = listOf("Baik", "Rusak Ringan", "Rusak Berat", "Hilang")
     var expanded by remember { mutableStateOf(false) }
@@ -61,18 +63,35 @@ fun PengembalianScreen(
     val todayDate = Date()
     val todayStr = remember { sdf.format(todayDate) }
 
+    // Pop-up peringatan jika kode buku tidak ditemukan di data peminjaman aktif
+    if (showNoDataPopup) {
+        AlertDialog(
+            onDismissRequest = { showNoDataPopup = false },
+            confirmButton = {
+                TextButton(onClick = { showNoDataPopup = false }) { Text("OK") }
+            },
+            title = { Text("Data Tidak Ditemukan") },
+            text = { Text("Tidak ada buku yang sedang dipinjam dengan kode tersebut.") },
+            icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red) },
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
     if (showReport && bookInfo != null) {
         ReturnReportDialog(
             info = bookInfo!!,
             actualReturnDateStr = todayStr,
             condition = selectedCondition,
             onDismiss = {
+                // --- LOGIKA FINAL PROSES PENGEMBALIAN ---
                 val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.forLanguageTag("id-ID"))
                 val dueDate = try { LocalDate.parse(bookInfo!!.dueDate, formatter) } catch (e: Exception) { LocalDate.now() }
                 val returnDate = LocalDate.now()
+                val isLate = returnDate.isAfter(dueDate)
                 val period = Period.between(dueDate, returnDate)
 
-                val lateDurationText = if (bookInfo!!.isLate) {
+                // Membuat teks durasi keterlambatan (jika ada)
+                val lateDurationText = if (isLate) {
                     val years = period.years
                     val months = period.months
                     val days = period.days
@@ -86,24 +105,27 @@ fun PengembalianScreen(
                     }.trim()
                 } else ""
 
-                val statusText = if (bookInfo!!.isLate) "Terlambat$lateDurationText - $selectedCondition" else "Tepat Waktu - $selectedCondition"
+                val statusText = if (isLate) "Terlambat$lateDurationText - $selectedCondition" else "Tepat Waktu - $selectedCondition"
                 
-                // Tambahkan stok buku kembali saat dikembalikan
+                // Menambah kembali stok buku yang dikembalikan ke dalam list global
                 val index = bukuList.indexOfFirst { it.kode.equals(bookInfo!!.code, ignoreCase = true) }
                 if (index != -1) {
                     val currentBuku = bukuList[index]
                     bukuList[index] = currentBuku.copy(stok = currentBuku.stok + 1)
                 }
 
+                // Menyimpan data ke riwayat pengembalian
                 onReturnSuccess(
                     LaporanItem(
                         title = bookInfo!!.title,
                         subtitle = bookInfo!!.borrower,
                         date = todayStr,
-                        status = statusText
+                        status = statusText,
+                        bookCode = bookInfo!!.code
                     )
                 )
 
+                // Reset state form setelah selesai
                 showReport = false
                 bookInfo = null
                 bookCode = ""
@@ -184,26 +206,36 @@ fun PengembalianScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // TOMBOL CARI
+            // Tombol untuk memvalidasi data peminjaman buku
             Button(
                 onClick = {
                     isSearchPerformed = true
                     val code = bookCode.trim().uppercase()
-                    val foundBuku = bukuList.find { it.kode.equals(code, ignoreCase = true) }
+                    
+                    // Mencocokkan kode buku dengan data riwayat peminjaman untuk mengambil info Tanggal Pinjam & Tenggat
+                    val pinjamanData = riwayatPeminjaman.find { it.bookCode.equals(code, ignoreCase = true) }
 
-                    bookInfo = if (foundBuku != null) {
-                        BookReturnInfo(
-                            code = foundBuku.kode,
-                            title = foundBuku.judul,
-                            borrower = pendaftarName,
+                    if (pinjamanData != null) {
+                        val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.forLanguageTag("id-ID"))
+                        val dueDateStr = pinjamanData.dueDate.ifBlank { "17 Januari 2024" }
+                        val dueDate = try { LocalDate.parse(dueDateStr, formatter) } catch (e: Exception) { LocalDate.now().plusDays(7) }
+                        val today = LocalDate.now()
+                        
+                        // Menyiapkan data info buku berdasarkan record peminjaman yang ditemukan
+                        bookInfo = BookReturnInfo(
+                            code = pinjamanData.bookCode,
+                            title = pinjamanData.title,
+                            borrower = pinjamanData.subtitle,
                             memberId = pendaftarId,
                             memberStatus = if (pendaftarId != "-") "Aktif" else "Tidak Aktif",
-                            borrowDate = "10 Januari 2024",
-                            dueDate = "17 Januari 2024",
-                            isLate = true
+                            borrowDate = pinjamanData.date,
+                            dueDate = dueDateStr,
+                            isLate = today.isAfter(dueDate)
                         )
                     } else {
-                        null
+                        // Menampilkan popup jika tidak ada record peminjaman aktif untuk kode buku tersebut
+                        bookInfo = null
+                        showNoDataPopup = true
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -216,7 +248,7 @@ fun PengembalianScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // TOMBOL RIWAYAT
+            // Tombol untuk melihat riwayat buku yang sudah pernah dikembalikan
             OutlinedButton(
                 onClick = { showHistory = true },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -299,7 +331,7 @@ fun PengembalianScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // PILIHAN KONDISI BUKU
+                        // Input Kondisi Buku: Khusus Admin yang bisa mengubah
                         Text(text = "Kondisi Buku Saat Kembali", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 12.sp)
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -353,11 +385,10 @@ fun PengembalianScreen(
                 }
             } else if (isSearchPerformed && bookCode.isNotBlank()) {
                 Text(
-                    "Kode buku tidak terdaftar dalam sistem.",
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium
+                    "Pencarian selesai.",
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -407,9 +438,11 @@ fun ReturnReportDialog(
     condition: String,
     onDismiss: () -> Unit
 ) {
+    // --- LOGIKA PERHITUNGAN SANKSI DAN DENDA ---
     val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.forLanguageTag("id-ID"))
     val dueDate = try { LocalDate.parse(info.dueDate, formatter) } catch (e: Exception) { LocalDate.now() }
     val returnDate = LocalDate.now()
+    val isLate = returnDate.isAfter(dueDate)
     val period = Period.between(dueDate, returnDate)
     val years = period.years
     val months = period.months
@@ -439,9 +472,9 @@ fun ReturnReportDialog(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = if (info.isLate || isDamagedOrLost) Icons.Default.Warning else Icons.Default.CheckCircle,
+                    imageVector = if (isLate || isDamagedOrLost) Icons.Default.Warning else Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = if (info.isLate || isDamagedOrLost) Color(0xFFC62828) else Color(0xFF2E7D32)
+                    tint = if (isLate || isDamagedOrLost) Color(0xFFC62828) else Color(0xFF2E7D32)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Laporan Pengembalian")
@@ -465,13 +498,14 @@ fun ReturnReportDialog(
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
-                        ReportRow("Status Keterlambatan", if (info.isLate) "Terlambat" else "Tepat Waktu")
+                        ReportRow("Status Keterlambatan", if (isLate) "Terlambat" else "Tepat Waktu")
 
-                        if (info.isLate) {
+                        if (isLate) {
                             ReportRow("Total Keterlambatan", lateDurationText)
 
                             Spacer(modifier = Modifier.height(16.dp))
 
+                            // Bagian informasi sanksi skorsing peminjaman
                             Surface(
                                 color = Color(0xFFFFEBEE),
                                 shape = RoundedCornerShape(8.dp),
@@ -507,6 +541,7 @@ fun ReturnReportDialog(
 
                         if (isDamagedOrLost) {
                             Spacer(modifier = Modifier.height(16.dp))
+                            // Bagian informasi kewajiban ganti buku baru
                             Surface(
                                 color = Color(0xFFFFF3E0),
                                 shape = RoundedCornerShape(8.dp),

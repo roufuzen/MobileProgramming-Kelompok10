@@ -83,7 +83,9 @@ fun PeminjamanScreen(
                     title = bookInfo!!.title,
                     subtitle = borrowerName,
                     date = borrowDate,
-                    status = "Dipinjam"
+                    status = "Dipinjam",
+                    bookCode = bookInfo!!.kode,
+                    dueDate = estimatedReturnDate
                 )
                 onBorrowSuccess(newItem)
 

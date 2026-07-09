@@ -100,11 +100,22 @@ class MainActivity : ComponentActivity() {
                             bukuList = daftarBuku,
                             pendaftarName = if (isAdmin) "Administrator" else if (isUserRegistered) savedName else "Tamu / Belum Daftar",
                             pendaftarId = if (isAdmin) "ADM-001" else if (isUserRegistered) savedNik else "-",
+                            riwayatPeminjaman = riwayatPeminjaman,
                             riwayatPengembalian = riwayatPengembalian,
                             isAdmin = isAdmin,
                             onBack = { currentScreen = "home" },
                             onReturnSuccess = { item ->
+                                // 1. Tambahkan ke riwayat pengembalian
                                 riwayatPengembalian.add(0, item) 
+
+                                // 2. Update status di riwayat peminjaman agar tidak bisa dikembalikan lagi (Reset)
+                                val index = riwayatPeminjaman.indexOfFirst { 
+                                    it.bookCode == item.bookCode && it.status == "Dipinjam" 
+                                }
+                                if (index != -1) {
+                                    // Mengubah status menjadi "Kembali" agar filter pencarian di form pengembalian tidak menemukannya lagi
+                                    riwayatPeminjaman[index] = riwayatPeminjaman[index].copy(status = "Kembali")
+                                }
                             }
                         )
                     }
