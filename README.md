@@ -15,6 +15,17 @@ Tonton video penjelasan project kami di sini:
 https://www.youtube.com/watch?v=50Qb8_K8N0g  
 ---
 
+## 📸 Screenshot Aplikasi
+ Berikut adalah beberapa tampilan utama dari aplikasi Perpustakaan Digital:
+​
+ | Login | Register | Dashboard |
+ |:---:|:---:|:---:|
+ | ![Login Screen](img/login2.png) | ![Register Screen](img/register.png) | ![Dashboard](img/dashboard1.png) |
+​
+ | Peminjaman | Pengembalian | Laporan |
+ |:---:|:---:|:---:|
+ | ![Peminjaman](img/peminjamanbuku.png) | ![Pengembalian Screen](img/pengembalianbuku.png) | ![Laporan](img/laporan.png) |
+
 ## 🚀 Fitur Utama Sistem
 Aplikasi ini dilengkapi dengan beberapa modul utama, antara lain:
 1. **Pendaftaran Anggota**: Proses registrasi bagi masyarakat umum agar terdata sebagai anggota resmi perpustakaan.
