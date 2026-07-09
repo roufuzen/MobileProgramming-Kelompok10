@@ -18,14 +18,32 @@ https://www.youtube.com/watch?v=50Qb8_K8N0g
 ## 📸 Screenshot Aplikasi
  Berikut adalah beberapa tampilan utama dari aplikasi Perpustakaan Digital:
 ​
- | Login | Register | Dashboard | Kelola Buku | 
- |:---:|:---:|:---:|
- | ![Login Screen](img/login2.png) | ![Register Screen](img/register.png) | ![Dashboard](img/dashboard1.png) | ![Kelola Buku](img/dashboard1.png) |
-​
- | Peminjaman | Pengembalian | Laporan |
- |:---:|:---:|:---:|
- | ![Peminjaman](img/peminjamanbuku.png) | ![Pengembalian Screen](img/pengembalianbuku.png) | ![Laporan](img/laporan.png) |
-
+<table>
+  <tr>
+    <th>Login</th>
+    <th>Register</th>
+    <th>Dashboard</th>
+    <th>Kelola Buku</th>
+  </tr>
+  <tr>
+    <td><img src="img/login2.png" width="180"></td>
+    <td><img src="img/register.png" width="180"></td>
+    <td><img src="img/dashboard1.png" width="180"></td>
+    <td><img src="img/kelolabuku2.png" width="180"></td>
+  </tr>
+  <tr>
+    <th>Peminjaman</th>
+    <th>Pengembalian</th>
+    <th>Laporan</th>
+    <th></th>
+  </tr>
+  <tr>
+    <td><img src="img/peminjamanbuku.png" width="180"></td>
+    <td><img src="img/pengembalianbuku.png" width="180"></td>
+    <td><img src="img/laporan.png" width="180"></td>
+    <td></td>
+  </tr>
+</table>
 ## 🚀 Fitur Utama Sistem
 Aplikasi ini dilengkapi dengan beberapa modul utama, antara lain:
 1. **Pendaftaran Anggota**: Proses registrasi bagi masyarakat umum agar terdata sebagai anggota resmi perpustakaan.
